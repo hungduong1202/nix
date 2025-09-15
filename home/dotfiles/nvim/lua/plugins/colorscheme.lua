@@ -21,10 +21,10 @@ return {
   { "ellisonleao/gruvbox.nvim" },
 
   -- Set colorscheme manually
-  -- {
-  --   "LazyVim/LazyVim",
-  -- opts = {
-  --   colorscheme = "tokyonight-moon",
-  -- },
-  -- },
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      colorscheme = "tokyonight-night",
+    },
+  },
 }
