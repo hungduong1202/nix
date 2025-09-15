@@ -13,12 +13,10 @@
       ll = "ls -l";
       la = "ls -la";
       gs = "git status";
-      update =
-        "nix run home-manager -- switch --flake .#zit1202";
+      update = "nix run home-manager -- switch --flake ~/nix-config#zit1202";
     };
 
     initContent = builtins.replaceStrings [ "\r\n" ] [ "\n" ] ''
-      
               source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
               [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
               eval "$(fnm env)"
@@ -47,8 +45,8 @@
 
   };
 
-  home.packages = with pkgs; [
-    zsh-autosuggestions
-    zsh-syntax-highlighting
-  ];
+  home.file.".p10k.zsh".source = config.lib.file.mkOutOfStoreSymlink
+    "${config.home.homeDirectory}/nix-config/home/dotfiles/.p10k.zsh";
+
+  home.packages = with pkgs; [ zsh-autosuggestions zsh-syntax-highlighting ];
 }

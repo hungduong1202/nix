@@ -1,16 +1,6 @@
 { config, pkgs, lib, ... }:
 
-let
-  script = lib.concatStringsSep "\n" [
-    ''if [ ! -d "$HOME/.dotfiles/nvim" ]; then''
-    ''echo "Bootstrapping Neovim config..."''
-    ''mkdir -p "$HOME/.dotfiles"''
-    ''
-      
-            "${pkgs.git}/bin/git" clone https://github.com/hungduong1202/lazynvim "$HOME/.dotfiles/nvim"''
-    "fi"
-  ];
-in {
+{
   programs.neovim = {
     enable = true;
     viAlias = true;
@@ -25,11 +15,12 @@ in {
     ];
   };
 
-  # Symlink ~/.dotfiles/nvim -> ~/.config/nvim
-  home.file.".config/nvim".source = config.lib.file.mkOutOfStoreSymlink
-    "${config.home.homeDirectory}/.dotfiles/nvim";
+  # home.file.".config/nvim/init.lua".source = "./dotfiles/nvim/init.lua";
+  #
 
-  # Bootstrap script: chạy khi build Home Manager
-  home.activation.nvimBootstrap =
-    lib.hm.dag.entryAfter [ "writeBoundary" ] "${script}";
+  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
+    "${config.home.homeDirectory}/nix-config/home/dotfiles/nvim";
+
+  home.file.".config/nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink
+    "${config.home.homeDirectory}/nix-config/home/dotfiles/nvim/init.lua";
 }
