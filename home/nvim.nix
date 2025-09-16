@@ -15,15 +15,13 @@
     ];
   };
 
-  # home.file.".config/nvim/init.lua".source = "./dotfiles/nvim/init.lua";
-  #
+  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
+    "${config.home.homeDirectory}/nix-config/home/dotfiles/lazynvim";
 
   # xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
-  #   "${config.home.homeDirectory}/nix-config/home/dotfiles/nvim";
+  #   "${config.home.homeDirectory}/nix-config/home/dotfiles/nvchad";
 
-  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
-    "${config.home.homeDirectory}/nix-config/home/dotfiles/nvchad";
 
   # home.file.".config/nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink
-  #   "${config.home.homeDirectory}/nix-config/home/dotfiles/nvim/init.lua";
+  #   "${config.home.homeDirectory}/nix-config/home/dotfiles/lazynvim/init.lua";
 }
