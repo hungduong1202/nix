@@ -15,12 +15,11 @@
     ];
   };
 
-  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
-    "${config.home.homeDirectory}/nix-config/home/dotfiles/lazynvim";
-
   # xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
-  #   "${config.home.homeDirectory}/nix-config/home/dotfiles/nvchad";
+  #   "${config.home.homeDirectory}/nix-config/home/dotfiles/nvim/lazynvim";
 
+  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink
+    "${config.home.homeDirectory}/nix-config/home/dotfiles/nvim/nvchad";
 
   # home.file.".config/nvim/init.lua".source = config.lib.file.mkOutOfStoreSymlink
   #   "${config.home.homeDirectory}/nix-config/home/dotfiles/lazynvim/init.lua";

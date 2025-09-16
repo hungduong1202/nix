@@ -6,11 +6,11 @@ return {
     user_default_options = {
       RGB = true, -- #RGB
       RRGGBB = true, -- #RRGGBB
-      names = false, -- bỏ tên màu như "red"
+      names = true, -- bỏ tên màu như "red"
       RRGGBBAA = true, -- hỗ trợ Color(0xAARRGGBB)
       AARRGGBB = true,
       css = true,
-      mode = "background", -- hoặc "virtualtext" để tô bên cạnh
+      mode = "background", -- background hoặc "virtualtext" để tô bên cạnh
     },
   },
 }
