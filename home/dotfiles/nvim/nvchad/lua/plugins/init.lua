@@ -11,16 +11,19 @@ return {
       require "configs.lspconfig"
     end,
   },
-
+  { "nvim-tree/nvim-tree.lua", enabled = false },
   -- { import = "nvchad.blink.lazyspec" },
 
   -- {
-  -- 	"nvim-treesitter/nvim-treesitter",
-  -- 	opts = {
-  -- 		ensure_installed = {
-  -- 			"vim", "lua", "vimdoc",
-  --      "html", "css"
-  -- 		},
-  -- 	},
+  --   "nvim-treesitter/nvim-treesitter",
+  --   opts = {
+  --     ensure_installed = {
+  --       "vim",
+  --       "lua",
+  --       "vimdoc",
+  --       "html",
+  --       "css",
+  --     },
+  --   },
   -- },
 }
