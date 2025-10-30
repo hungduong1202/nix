@@ -1,8 +1,8 @@
 { config, pkgs, ... }:
 
 {
-  home.username = "zit1202";
-  home.homeDirectory = "/home/zit1202";
+  home.username = "hung.duong";
+  home.homeDirectory = "/home/hung.duong";
   home.stateVersion = "25.05";
   home.shell.enableZshIntegration = true;
   home.packages = with pkgs; [
@@ -15,7 +15,7 @@
     meslo-lgs-nf
     zsh
     flutter
-    nix-ld
+    # nix-ld
     pay-respects
     fnm
     gnumake

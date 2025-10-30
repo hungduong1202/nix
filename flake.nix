@@ -14,10 +14,10 @@
         pkgs = import nixpkgs { inherit system; };
       in {
         packages = {
-          homeConfigurations.zit1202 = home-manager.lib.homeManagerConfiguration {
+          homeConfigurations.hung-duong = home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
             modules = [
-              ./home/zit1202.nix
+              ./home/default.nix
             ];
           };
         };
