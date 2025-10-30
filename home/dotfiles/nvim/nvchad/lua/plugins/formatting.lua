@@ -1,11 +1,9 @@
 return {
   "stevearc/conform.nvim",
+  event = "BufWritePre", -- uncomment for format on save
   opts = {
     formatters = {
-      nixpkgs_fmt = {
-        command = "nixpkgs-fmt",
-        stdin = true,
-      },
+      nixfmt = {},
       prettier = {},
       xmllint = {
         command = "xmllint",
@@ -24,7 +22,11 @@ return {
       javascript = { "prettier" },
       typescript = { "prettier" },
       csharp = { "csharpier" }, -- thêm cho .NET / C#
-      nix = { "nixpkgs_fmt" },
+      nix = { "nixfmt" },
+    },
+    format_on_save = {
+      timeout_ms = 500,
+      lsp_fallback = true,
     },
   },
 }

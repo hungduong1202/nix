@@ -1,4 +1,4 @@
--- ~/.config/nvim/lua/plugins/mason-tools.lua
+-- ~/.config/nvim/lua/plugins/mason-tools.luajj
 -- return {
 --   {
 --     "WhoIsSethDaniel/mason-tool-installer.nvim",
@@ -41,6 +41,10 @@
 
 return {
   "WhoIsSethDaniel/mason-tool-installer.nvim",
+  dependencies = {
+    "williamboman/mason.nvim",
+    "williamboman/mason-lspconfig.nvim",
+  },
   opts = {
     ensure_installed = {
       -- === Language Servers ===
@@ -92,5 +96,12 @@ return {
     },
     auto_update = false,
     run_on_start = true,
+    start_delay = 3000,
+    debounce_hours = 5,
+    integrations = {
+      ["mason-lspconfig"] = true,
+      ["mason-null-ls"] = true,
+      ["mason-nvim-dap"] = true,
+    },
   },
 }

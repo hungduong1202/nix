@@ -1,10 +1,22 @@
 { config, pkgs, ... }:
 
+let
+  username = "hung.duong";
+  homeDir =
+    if pkgs.stdenv.isDarwin then "/Users/${username}"
+    else "/home/${username}";
+in
 {
-  # home.username = "hung.duong";
-  # home.homeDirectory = "/home/hung.duong";
-  # home.stateVersion = "25.05";
+  home.username = username;
+  home.homeDirectory = homeDir;
+  home.stateVersion = "25.05";
+
+  home.sessionVariables = {
+    CARGO_TARGET_DIR = "${config.home.homeDirectory}/.cargo/target";
+  };
+
   home.shell.enableZshIntegration = true;
+
   home.packages = with pkgs; [
     htop
     git
@@ -15,7 +27,6 @@
     meslo-lgs-nf
     zsh
     flutter
-    # nix-ld
     pay-respects
     fnm
     gnumake
@@ -25,12 +36,18 @@
     cargo
     unzip
     lazygit
+    statix
+    nixpkgs-fmt
+    nil
   ];
 
   programs.git = {
     enable = true;
-    userName = "hung.duong";
-    userEmail = "hung12384@gmail.com";
+
+    settings = {
+      user.name = "hung.duong";
+      user.email = "hung12384@gmail.com";
+    };
   };
 
   programs.neovim = {
@@ -39,6 +56,8 @@
     vimAlias = true;
   };
 
-  imports = [ ./zsh.nix ./nvim.nix ];
-
+  imports = [
+    ./zsh.nix
+    ./nvim.nix
+  ];
 }

@@ -8,13 +8,17 @@
     "lazyvim.plugins.extras.dap.core",
     "lazyvim.plugins.extras.editor.inc-rename",
     "lazyvim.plugins.extras.editor.mini-diff",
+    "lazyvim.plugins.extras.editor.mini-files",
+    "lazyvim.plugins.extras.editor.mini-move",
     "lazyvim.plugins.extras.editor.refactoring",
     "lazyvim.plugins.extras.formatting.prettier",
     "lazyvim.plugins.extras.lang.angular",
+    "lazyvim.plugins.extras.lang.dart",
     "lazyvim.plugins.extras.lang.docker",
+    "lazyvim.plugins.extras.lang.dotnet",
     "lazyvim.plugins.extras.lang.json",
     "lazyvim.plugins.extras.lang.markdown",
-    "lazyvim.plugins.extras.lang.omnisharp",
+    "lazyvim.plugins.extras.lang.nix",
     "lazyvim.plugins.extras.lang.tailwind",
     "lazyvim.plugins.extras.lang.toml",
     "lazyvim.plugins.extras.lang.typescript",
@@ -24,7 +28,6 @@
     "lazyvim.plugins.extras.test.core",
     "lazyvim.plugins.extras.ui.edgy",
     "lazyvim.plugins.extras.ui.indent-blankline",
-    "lazyvim.plugins.extras.ui.mini-animate",
     "lazyvim.plugins.extras.ui.smear-cursor",
     "lazyvim.plugins.extras.util.dot",
     "lazyvim.plugins.extras.util.mini-hipatterns",
@@ -32,7 +35,7 @@
   ],
   "install_version": 8,
   "news": {
-    "NEWS.md": "10960"
+    "NEWS.md": "11866"
   },
   "version": 8
 }
