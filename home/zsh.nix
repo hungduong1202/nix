@@ -13,7 +13,7 @@
       ll = "ls -l";
       la = "ls -la";
       gs = "git status";
-      update = "nix run home-manager -- switch --flake ~/nix-config#hung.duong";
+      update = "nix run github:nix-community/home-manager/master -- switch --flake ~/nix-config";
     };
 
     initContent = builtins.replaceStrings [ "\r\n" ] [ "\n" ] ''
