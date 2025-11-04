@@ -13,16 +13,16 @@
       ll = "ls -l";
       la = "ls -la";
       gs = "git status";
-      update = "nix run home-manager -- switch --flake ~/nix-config#zit1202";
+      update = "nix run home-manager -- switch --flake ~/nix-config#hung.duong";
     };
 
     initContent = builtins.replaceStrings [ "\r\n" ] [ "\n" ] ''
-              source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-              [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-              eval "$(fnm env)"
-              eval "$(pay-respects zsh --alias)"
-    source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-    source ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+                source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+                [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+                eval "$(fnm env)"
+                eval "$(pay-respects zsh --alias)"
+      source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+      source ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     '';
 
     # initContent ="source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
