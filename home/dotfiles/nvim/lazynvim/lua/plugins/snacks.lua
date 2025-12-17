@@ -1,6 +1,6 @@
--- if true then
---   return {}
--- end
+if true then
+  return {}
+end
 return {
 
   "folke/snacks.nvim",
@@ -8,21 +8,21 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
-    -- bigfile = { enabled = true },
+    bigfile = { enabled = true },
     dashboard = { enabled = true },
-    explorer = { enabled = true },
-    -- indent = { enabled = true },
-    -- input = { enabled = true },
-    -- notifier = {
-    --   enabled = true,
-    --   timeout = 3000,
-    -- },
-    -- picker = { enabled = true },
-    -- quickfile = { enabled = true },
-    -- scope = { enabled = true },
-    -- scroll = { enabled = true },
-    -- statuscolumn = { enabled = true },
-    -- words = { enabled = true },
+    explorer = { enabled = false },
+    indent = { enabled = true },
+    input = { enabled = true },
+    notifier = {
+      enabled = true,
+      timeout = 3000,
+    },
+    picker = { enabled = true },
+    quickfile = { enabled = true },
+    scope = { enabled = true },
+    scroll = { enabled = true },
+    statuscolumn = { enabled = true },
+    words = { enabled = true },
     styles = {
       notification = {
         -- wo = { wrap = true } -- Wrap notifications
@@ -67,7 +67,7 @@ return {
       desc = "Notification History",
     },
     {
-      "<leader>e",
+      "<leader>ee",
       function()
         Snacks.explorer()
       end,
@@ -103,7 +103,7 @@ return {
       desc = "Find Git Files",
     },
     {
-      "<leader>fj",
+      "<leader>fp",
       function()
         Snacks.picker.projects()
       end,
@@ -162,7 +162,7 @@ return {
     {
       "<leader>gf",
       function()
-        Snacks.picser.git_log_file()
+        Snacks.picker.git_log_file()
       end,
       desc = "Git Log File",
     },
@@ -240,14 +240,14 @@ return {
       desc = "Commands",
     },
     {
-      "<leader>cd",
+      "<leader>sd",
       function()
         Snacks.picker.diagnostics()
       end,
       desc = "Diagnostics",
     },
     {
-      "<leader>cD",
+      "<leader>sD",
       function()
         Snacks.picker.diagnostics_buffer()
       end,

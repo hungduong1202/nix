@@ -26,7 +26,6 @@ in
     python3
     meslo-lgs-nf
     zsh
-    flutter
     pay-respects
     fnm
     gnumake
@@ -39,6 +38,7 @@ in
     statix
     nixpkgs-fmt
     nil
+    # flutter
   ];
 
   programs.git = {

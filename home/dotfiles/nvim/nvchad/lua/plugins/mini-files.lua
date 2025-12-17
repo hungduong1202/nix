@@ -3,203 +3,179 @@ return {
   version = "*",
   event = "VeryLazy",
   config = function()
-    local _, MiniFiles = pcall(require, "mini.files")
+    local ok, MiniFiles = pcall(require, "mini.files")
+    if not ok then
+      return
+    end
+
     MiniFiles.setup()
 
-    -- Keymap mở mini.files
-    vim.keymap.set("n", "<leader>e", MiniFiles.open, { desc = "Open MiniFiles" })
-    local nsMiniFiles = vim.api.nvim_create_namespace "mini_files_git"
-    local autocmd = vim.api.nvim_create_autocmd
-    local _, MiniFiles = pcall(require, "mini.files")
+    vim.keymap.set("n", "<leader>E", MiniFiles.open, { desc = "Open MiniFiles" })
 
-    -- Cache for git status
-    local gitStatusCache = {}
-    local cacheTimeout = 2000 -- in milliseconds
+    local nsMiniFiles = vim.api.nvim_create_namespace "MiniFilesGit"
+    local autocmd = vim.api.nvim_create_autocmd
     local uv = vim.uv or vim.loop
+
+    -- =========================
+    -- Cache
+    -- =========================
+    local gitStatusCache = {}
+    local cacheTimeout = 2 -- seconds
 
     local function isSymlink(path)
       local stat = uv.fs_lstat(path)
       return stat and stat.type == "link"
     end
 
-    ---@type table<string, {symbol: string, hlGroup: string}>
-    ---@param status string
-    ---@return string symbol, string hlGroup
+    -- =========================
+    -- Icon & Highlight mapping
+    -- =========================
     local function mapSymbols(status, is_symlink)
       local statusMap = {
-    -- stylua: ignore start 
-    [" M"] = { symbol = "•", hlGroup  = "MiniDiffSignChange"}, -- Modified in the working directory
-    ["M "] = { symbol = "✹", hlGroup  = "MiniDiffSignChange"}, -- modified in index
-    ["MM"] = { symbol = "≠", hlGroup  = "MiniDiffSignChange"}, -- modified in both working tree and index
-    ["A "] = { symbol = "+", hlGroup  = "MiniDiffSignAdd"   }, -- Added to the staging area, new file
-    ["AA"] = { symbol = "≈", hlGroup  = "MiniDiffSignAdd"   }, -- file is added in both working tree and index
-    ["D "] = { symbol = "-", hlGroup  = "MiniDiffSignDelete"}, -- Deleted from the staging area
-    ["AM"] = { symbol = "⊕", hlGroup  = "MiniDiffSignChange"}, -- added in working tree, modified in index
-    ["AD"] = { symbol = "-•", hlGroup = "MiniDiffSignChange"}, -- Added in the index and deleted in the working directory
-    ["R "] = { symbol = "→", hlGroup  = "MiniDiffSignChange"}, -- Renamed in the index
-    ["U "] = { symbol = "‖", hlGroup  = "MiniDiffSignChange"}, -- Unmerged path
-    ["UU"] = { symbol = "⇄", hlGroup  = "MiniDiffSignAdd"   }, -- file is unmerged
-    ["UA"] = { symbol = "⊕", hlGroup  = "MiniDiffSignAdd"   }, -- file is unmerged and added in working tree
-    ["??"] = { symbol = "?", hlGroup  = "MiniDiffSignDelete"}, -- Untracked files
-    ["!!"] = { symbol = "!", hlGroup  = "MiniDiffSignChange"}, -- Ignored files
-        -- stylua: ignore end
+        [" M"] = { symbol = "•", hl = "MiniDiffSignChange" },
+        ["M "] = { symbol = "✹", hl = "MiniDiffSignChange" },
+        ["MM"] = { symbol = "≠", hl = "MiniDiffSignChange" },
+        ["A "] = { symbol = "+", hl = "MiniDiffSignAdd" },
+        ["AA"] = { symbol = "≈", hl = "MiniDiffSignAdd" },
+        ["D "] = { symbol = "-", hl = "MiniDiffSignDelete" },
+        ["AM"] = { symbol = "⊕", hl = "MiniDiffSignChange" },
+        ["AD"] = { symbol = "-•", hl = "MiniDiffSignChange" },
+        ["R "] = { symbol = "→", hl = "MiniDiffSignChange" },
+        ["U "] = { symbol = "‖", hl = "MiniDiffSignChange" },
+        ["UU"] = { symbol = "⇄", hl = "MiniDiffSignAdd" },
+        ["UA"] = { symbol = "⊕", hl = "MiniDiffSignAdd" },
+        ["??"] = { symbol = "?", hl = "MiniDiffSignDelete" },
+        ["!!"] = { symbol = "!", hl = "MiniDiffSignChange" },
       }
 
-      local result = statusMap[status] or { symbol = "?", hlGroup = "NonText" }
-      local gitSymbol = result.symbol
-      local gitHlGroup = result.hlGroup
+      local item = statusMap[status] or { symbol = "?", hl = "NonText" }
+      local symbol = (is_symlink and "↩" or "") .. item.symbol
+      local hl = is_symlink and "MiniDiffSignDelete" or item.hl
 
-      local symlinkSymbol = is_symlink and "↩" or ""
-
-      -- Combine symlink symbol with Git status if both exist
-      local combinedSymbol = (symlinkSymbol .. gitSymbol):gsub("^%s+", ""):gsub("%s+$", "")
-      -- Change the color of the symlink icon from "MiniDiffSignDelete" to something else
-      local combinedHlGroup = is_symlink and "MiniDiffSignDelete" or gitHlGroup
-
-      return combinedSymbol, combinedHlGroup
+      return symbol, hl
     end
 
-    ---@param cwd string
-    ---@param callback function
-    ---@return nil
+    -- =========================
+    -- Git status fetch
+    -- =========================
     local function fetchGitStatus(cwd, callback)
-      local clean_cwd = cwd:gsub("^minifiles://%d+/", "")
-      ---@param content table
-      local function on_exit(content)
-        if content.code == 0 then
-          callback(content.stdout)
-          -- vim.g.content = content.stdout
+      vim.system({ "git", "status", "--ignored", "--porcelain" }, { text = true, cwd = cwd }, function(res)
+        if res.code == 0 then
+          callback(res.stdout)
+        end
+      end)
+    end
+
+    -- =========================
+    -- Parse git status
+    -- =========================
+    local function parseGitStatus(content)
+      local map = {}
+
+      for line in content:gmatch "[^\r\n]+" do
+        local status, path = line:match "^(..)%s+(.*)"
+        if status and path then
+          -- handle rename: old -> new
+          path = path:match "->%s*(.*)" or path
+
+          local parts = {}
+          for p in path:gmatch "[^/]+" do
+            table.insert(parts, p)
+          end
+
+          local key = ""
+          for i, part in ipairs(parts) do
+            key = (i == 1) and part or (key .. "/" .. part)
+            map[key] = map[key] or status
+          end
         end
       end
-      ---@see vim.system
-      vim.system({ "git", "status", "--ignored", "--porcelain" }, { text = true, cwd = clean_cwd }, on_exit)
+
+      return map
     end
 
-    ---@param buf_id integer
-    ---@param gitStatusMap table
-    ---@return nil
-    local function updateMiniWithGit(buf_id, gitStatusMap)
+    -- =========================
+    -- Update MiniFiles UI
+    -- =========================
+    local function updateMiniWithGit(bufnr, statusMap)
       vim.schedule(function()
-        local nlines = vim.api.nvim_buf_line_count(buf_id)
-        local cwd = vim.fs.root(buf_id, ".git")
-        local escapedcwd = cwd and vim.pesc(cwd)
-        escapedcwd = vim.fs.normalize(escapedcwd)
+        vim.api.nvim_buf_clear_namespace(bufnr, nsMiniFiles, 0, -1)
 
-        for i = 1, nlines do
-          local entry = MiniFiles.get_fs_entry(buf_id, i)
+        local cwd = vim.fs.root(bufnr, ".git")
+        if not cwd then
+          return
+        end
+
+        cwd = vim.fs.normalize(vim.pesc(cwd))
+        local lines = vim.api.nvim_buf_line_count(bufnr)
+
+        for i = 1, lines do
+          local entry = MiniFiles.get_fs_entry(bufnr, i)
           if not entry then
             break
           end
-          local relativePath = entry.path:gsub("^" .. escapedcwd .. "/", "")
-          local status = gitStatusMap[relativePath]
+
+          local rel = entry.path:gsub("^" .. cwd .. "/", "")
+          local status = statusMap[rel]
 
           if status then
-            local symbol, hlGroup = mapSymbols(status, isSymlink(entry.path))
-            vim.api.nvim_buf_set_extmark(buf_id, nsMiniFiles, i - 1, 0, {
+            local symbol, hl = mapSymbols(status, isSymlink(entry.path))
+
+            vim.api.nvim_buf_set_extmark(bufnr, nsMiniFiles, i - 1, 0, {
               sign_text = symbol,
-              sign_hl_group = hlGroup,
+              sign_hl_group = hl,
               priority = 2,
             })
-            -- This below code is responsible for coloring the text of the items. comment it out if you don't want that
-            local line = vim.api.nvim_buf_get_lines(buf_id, i - 1, i, false)[1]
-            -- Find the name position accounting for potential icons
-            local nameStartCol = line:find(vim.pesc(entry.name)) or 0
 
-            if nameStartCol > 0 then
-              vim.api.nvim_buf_set_extmark(buf_id, nsMiniFiles, i - 1, nameStartCol - 1, {
-                end_col = nameStartCol + #entry.name - 1,
-                hl_group = hlGroup,
+            local line = vim.api.nvim_buf_get_lines(bufnr, i - 1, i, false)[1]
+            local col = #line - #entry.name
+
+            if col >= 0 then
+              vim.api.nvim_buf_set_extmark(bufnr, nsMiniFiles, i - 1, col, {
+                end_col = col + #entry.name,
+                hl_group = hl,
               })
             end
-          else
           end
         end
       end)
     end
 
-    -- Thanks for the idea of gettings https://github.com/refractalize/oil-git-status.nvim signs for dirs
-    ---@param content string
-    ---@return table
-    local function parseGitStatus(content)
-      local gitStatusMap = {}
-      -- lua match is faster than vim.split (in my experience )
-      for line in content:gmatch "[^\r\n]+" do
-        local status, filePath = string.match(line, "^(..)%s+(.*)")
-        -- Split the file path into parts
-        local parts = {}
-        for part in filePath:gmatch "[^/]+" do
-          table.insert(parts, part)
-        end
-        -- Start with the root directory
-        local currentKey = ""
-        for i, part in ipairs(parts) do
-          if i > 1 then
-            -- Concatenate parts with a separator to create a unique key
-            currentKey = currentKey .. "/" .. part
-          else
-            currentKey = part
-          end
-          -- If it's the last part, it's a file, so add it with its status
-          if i == #parts then
-            gitStatusMap[currentKey] = status
-          else
-            -- If it's not the last part, it's a directory. Check if it exists, if not, add it.
-            if not gitStatusMap[currentKey] then
-              gitStatusMap[currentKey] = status
-            end
-          end
-        end
-      end
-      return gitStatusMap
-    end
-
-    ---@param buf_id integer
-    ---@return nil
-    local function updateGitStatus(buf_id)
-      if not vim.fs.root(buf_id, ".git") then
+    -- =========================
+    -- Public update
+    -- =========================
+    local function updateGitStatus(bufnr)
+      local cwd = vim.fs.root(bufnr, ".git")
+      if not cwd then
         return
       end
-      local cwd = vim.fs.root(buf_id, ".git")
-      -- local cwd = vim.fn.expand("%:p:h")
-      local currentTime = os.time()
 
-      if gitStatusCache[cwd] and currentTime - gitStatusCache[cwd].time < cacheTimeout then
-        updateMiniWithGit(buf_id, gitStatusCache[cwd].statusMap)
+      local now = os.time()
+      local cached = gitStatusCache[cwd]
+
+      if cached and (now - cached.time < cacheTimeout) then
+        updateMiniWithGit(bufnr, cached.map)
       else
         fetchGitStatus(cwd, function(content)
-          local gitStatusMap = parseGitStatus(content)
-          gitStatusCache[cwd] = {
-            time = currentTime,
-            statusMap = gitStatusMap,
-          }
-          updateMiniWithGit(buf_id, gitStatusMap)
+          local map = parseGitStatus(content)
+          gitStatusCache[cwd] = { time = now, map = map }
+          updateMiniWithGit(bufnr, map)
         end)
       end
     end
 
-    ---@return nil
-    local function clearCache()
-      gitStatusCache = {}
-    end
-
+    -- =========================
+    -- Autocmds
+    -- =========================
     local function augroup(name)
-      return vim.api.nvim_create_augroup("MiniFiles_" .. name, { clear = true })
+      return vim.api.nvim_create_augroup("MiniFilesGit_" .. name, { clear = true })
     end
 
     autocmd("User", {
-      group = augroup "start",
+      group = augroup "open",
       pattern = "MiniFilesExplorerOpen",
       callback = function()
-        local bufnr = vim.api.nvim_get_current_buf()
-        updateGitStatus(bufnr)
-      end,
-    })
-
-    autocmd("User", {
-      group = augroup "close",
-      pattern = "MiniFilesExplorerClose",
-      callback = function()
-        clearCache()
+        updateGitStatus(vim.api.nvim_get_current_buf())
       end,
     })
 
@@ -209,9 +185,17 @@ return {
       callback = function(args)
         local bufnr = args.data.buf_id
         local cwd = vim.fs.root(bufnr, ".git")
-        if gitStatusCache[cwd] then
-          updateMiniWithGit(bufnr, gitStatusCache[cwd].statusMap)
+        if cwd and gitStatusCache[cwd] then
+          updateMiniWithGit(bufnr, gitStatusCache[cwd].map)
         end
+      end,
+    })
+
+    autocmd("User", {
+      group = augroup "close",
+      pattern = "MiniFilesExplorerClose",
+      callback = function()
+        gitStatusCache = {}
       end,
     })
   end,

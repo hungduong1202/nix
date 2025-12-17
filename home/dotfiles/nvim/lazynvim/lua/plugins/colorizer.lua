@@ -10,7 +10,7 @@ return {
       RRGGBBAA = true, -- hỗ trợ Color(0xAARRGGBB)
       AARRGGBB = true,
       css = true,
-      mode = "background", -- background hoặc "virtualtext" để tô bên cạnh
+      mode = "virtualtext", -- background hoặc "virtualtext" để tô bên cạnh
     },
   },
 }

@@ -14,6 +14,12 @@ M.base46 = {
   -- },
 }
 
+M.ui = {
+  tabufline = {
+    enabled = true,
+  },
+}
+
 -- M.nvdash = {
 --   load_on_startup = true,
 -- }

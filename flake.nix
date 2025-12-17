@@ -12,9 +12,10 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-      in {
-        packages = {
-          homeConfigurations."hung.duong" = home-manager.lib.homeManagerConfiguration {
+      in
+      {
+        homeConfigurations = {
+          hung.duong = home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
             modules = [
               ./home/default.nix
